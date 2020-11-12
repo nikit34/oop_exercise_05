@@ -21,7 +21,11 @@ private:
 public:
 	class ForwardIterator {
 	public:
-
+		using value_type = T;
+	    using reference = T&;
+	    using pointer = T*;
+	    using difference_type = ptrdiff_t;
+	    using iterator_category = std::forward_iterator_tag;
 		friend class Queue;
 
 		ForwardIterator(std::shared_ptr<Node> it = nullptr): ptr{it} {};
@@ -81,44 +85,44 @@ public:
 	Queue(): head{nullptr}, tail{head}, size{0} {};
 
 	void Push(const T& val) {
-		if (!this->head) {
-			this->head = std::make_shared<Node>(val);
-			this->tail = this->head;
+		if (!head) {
+			head = std::make_shared<Node>(val);
+			tail = head;
 		} else {
 			std::shared_ptr<Node> newElem = std::make_shared<Node>(val);
-			newElem->prev = this->tail;
-			this->tail.lock()->next = newElem;
-			this->tail = newElem;
+			newElem->prev = tail;
+			tail.lock()->next = newElem;
+			tail = newElem;
 		}
-		++this->size;
+		size++;
 	}
 
 	void Pop() {
 		if (this->head) {
-			this->head = this->head->next;
-			--this->size;
+			head = head->next;
+			size--;
 		}
 	}
 
 	ForwardIterator Insert(const ForwardIterator it, const T& val) {
 		if (it == ForwardIterator{}) {
-			if (this->tail.lock() == nullptr) {
+			if (tail.lock() == nullptr) {
 				Push(val);
 				return Begin();
 			}
 			std::shared_ptr<Node> newElem = std::make_shared<Node>(val);
-			newElem->prev = this->tail;
-			this->tail.lock()->next = newElem;
-			this->tail = newElem;
-			++this->size;
+			newElem->prev = tail;
+			tail.lock()->next = newElem;
+			tail = newElem;
+			size++;
 			return newElem;
 		}
 		if (it == Begin()) {
 			std::shared_ptr<Node> newElem = std::make_shared<Node>(val);
 			newElem->next = it.ptr.lock();
 			it->prev.lock() = newElem;
-			this->head = newElem;
-			++this->size;
+			head = newElem;
+			size++;
 			return newElem;
 		}
 		std::shared_ptr<Node> newElem = std::make_shared<Node>(val);
@@ -126,65 +130,65 @@ public:
 		it->prev.lock()->next = newElem;
 		newElem->prev = it->prev;
 		it->prev.lock() = newElem;
-		++this->size;
+		size++;
 		return newElem;
 	}
 
 
 	ForwardIterator Erase(const ForwardIterator it) {
-		if (it == ForwardIterator{}) { //удаление несуществующего элемента
+		if (it == ForwardIterator{}) {
 			return End();
 		}
-		if (it->prev.lock() == nullptr && this->head == this->tail.lock()) { //удаление очереди, состоящей только из одного элемента
-			this->head = nullptr;
-			this->tail = this->head;
-			this->size = 0;
+		if (it->prev.lock() == nullptr && head == tail.lock()) {
+			head = nullptr;
+			tail = head;
+			size = 0;
 			return End();
 		}
 		if (it->prev.lock() == nullptr) {
 			it->next->prev.lock() = nullptr;
-			this->head = it->next;
-			--this->size;
-			return this->head;
+			head = it->next;
+			size--;
+			return head;
 		}
 		ForwardIterator res = it.Next();
 		if (res == ForwardIterator{}) {
 			it->prev.lock()->next = nullptr;
-			--this->size;
+			size--;
 			return End();
 		}
 		it->next->prev = it->prev;
 		it->prev.lock()->next = it->next;
-		--this->size;
+	    size--;
 		return res;
 	}
 
 	const T Front() {
-		if (this->head == nullptr)
+		if (head == nullptr)
 			throw std::out_of_range("Empty item");
-		return this->head->value;
+		return head->value;
 	}
 
 	const T& Front() const {
-		if (this->head == nullptr)
+		if (head == nullptr)
 			throw std::out_of_range("Empty item");
-		return this->head->value;
+		return head->value;
 	}
 
 	const T Back() {
-		if (this->head == nullptr)
+		if (head == nullptr)
 			throw std::out_of_range("Empty item");
-		return this->tail.lock()->value;
+		return tail.lock()->value;
 	}
 
 	const T& Back() const {
-		if (this->head == nullptr)
+		if (head == nullptr)
 			throw std::out_of_range("Empty item");
-		return this->tail.lock()->value;
+		return tail.lock()->value;
 	}
 
 	ForwardIterator Begin() {
-		return this->head;
+		return head;
 	}
 
 	ForwardIterator End() {
@@ -192,23 +196,23 @@ public:
 	}
 
 	bool Empty() const {
-		return this->size == 0;
+		return size == 0;
 	}
 
 	size_t Size() const {
-		return this->size;
+		return size;
 	}
 
 	void Swap(Queue &rhs) {
-		std::shared_ptr<Node> temp = this->head;
-		this->head = rhs.head;
+		std::shared_ptr<Node> temp = head;
+		head = rhs.head;
 		rhs.head = temp;
 	}
 
 	void Clear() {
-		this->head = nullptr;
-		this->tail = this->head;
-		this->size = 0;
+		head = nullptr;
+		tail = head;
+		size = 0;
 	}
 
 	void Print() {

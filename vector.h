@@ -24,18 +24,12 @@ struct Vector {
 };
 
 template<typename T>
-double Length(const Vector<T> &vector) {
-	return sqrt(vector.p1 * vector.p1 + vector.p2 * vector.p2);
-}
-
-template<typename T>
-double Length(const std::pair<T, T> &A,
-			  const std::pair<T, T> &B) {
+double Length(const std::pair<T, T> &A, const std::pair<T, T> &B) {
 	return sqrt(pow((B.first - A.first), 2) +
 				pow((B.second - A.second), 2));
 }
 
 template<typename T>
-bool is_parallel(const Vector<T> &A, const Vector<T> &B) {
-	return (A.p1 * B.p2) - (A.p2 * B.p1) == 0;
+bool is_parallel(const std::pair<T, T> &A, const std::pair<T, T> &B, const std::pair<T, T> &C, const std::pair<T, T> &D) {
+	return (B.second - A.second) * (D.first - C.first) - (D.second - C.second) * (B.first - A.first) == 0;
 }
